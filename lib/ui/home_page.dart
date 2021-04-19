@@ -18,7 +18,8 @@ class HomePage extends StatelessWidget {
 
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  final Color _appColor = Color(0xff345461);
+  final Color _appColor = Colors.black87
+  ;
 
   @override
   Widget build(BuildContext context) {

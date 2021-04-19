@@ -22,7 +22,7 @@ class GridImages extends StatefulWidget {
 class _GridImagesState extends State<GridImages> {
 
   // TODO colocar no theme
-  Color _appColor = Color(0xff345461);
+  Color _appColor = Colors.blueGrey;
   bool isLoading = false, isLoadingPositive = false;
   String indexSelected = '0', lastIndexSelected = '0', _actualPaper;
   bool positiveClicked = false;
