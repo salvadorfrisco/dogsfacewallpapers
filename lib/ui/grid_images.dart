@@ -1,11 +1,11 @@
 import 'dart:io';
 
 import 'package:dogs_wallpaper/services/storage_service.dart';
+import 'package:dogs_wallpaper/widgets/circular_indicator.dart';
 import 'package:dogs_wallpaper/widgets/custom_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:get/get.dart';
 import 'package:wallpaper_manager/wallpaper_manager.dart';
 
 class GridImages extends StatefulWidget {
@@ -20,7 +20,6 @@ class GridImages extends StatefulWidget {
 }
 
 class _GridImagesState extends State<GridImages> {
-
   // TODO colocar no theme
   Color _appColor = Colors.blueGrey;
   bool isLoading = false, isLoadingPositive = false;
@@ -34,114 +33,104 @@ class _GridImagesState extends State<GridImages> {
         future: getActualPaper(),
         builder: (context, snapshot) {
           if (snapshot.hasData) {
-
             return SafeArea(
                 child: Scaffold(
                     backgroundColor: _appColor,
                     body: showImageCard(widget.index)));
           } else
-            return Center(
-                child: CircularProgressIndicator(
-                  backgroundColor: Colors.red,
-                ));
+            return CircularIndicator();
         });
   }
 
-showImageCard(String index) {
-  showImage() {
-    showGeneralDialog(
-      barrierDismissible: false,
-      barrierColor: Colors.black54, // s
-      context: context,// pace around dialog
-      transitionDuration: Duration(milliseconds: 800),
-      transitionBuilder: (context, a1, a2, child) {
-        return Stack(
+  showImageCard(String index) {
+    showImage() {
+      showGeneralDialog(
+        barrierDismissible: false,
+        barrierColor: Colors.black54, // s
+        context: context, // pace around dialog
+        transitionDuration: Duration(milliseconds: 800),
+        transitionBuilder: (context, a1, a2, child) {
+          return Stack(
+            children: [
+              ScaleTransition(
+                scale: CurvedAnimation(
+                    parent: a1,
+                    curve: Curves.elasticOut,
+                    reverseCurve: Curves.easeOutCubic),
+                child: CustomDialog(
+                  // our custom dialog
+                  title: "",
+                  content: "",
+                  // "Here goes the content of dialog. Here goes the content of dialog. Here goes the content of dialog.",
+                  backgroundImage:
+                      'https://pauliseguros.com.br/dogs_paper/$index.jpg',
+                  positiveBtnText: "Done",
+                  negativeBtnText: "Cancel",
+                  sameIndexSelected: index == lastIndexSelected,
+                  positiveBtnPressed: positiveAction,
+                  negativeBtnPressed: negativeAction,
+                ),
+              ),
+              isLoadingPositive
+                  ? CircularIndicator()
+                  : Container(),
+            ],
+          );
+        },
+        pageBuilder: (BuildContext context, Animation animation,
+            Animation secondaryAnimation) {
+          return null;
+        },
+      );
+      Future.delayed(const Duration(seconds: 1), () {
+        lastIndexSelected = index;
+      });
+    }
+
+    return GestureDetector(
+      onTap: showImage,
+      child: Card(
+        color: _appColor,
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            ScaleTransition(
-              scale: CurvedAnimation(
-                  parent: a1,
-                  curve: Curves.elasticOut,
-                  reverseCurve: Curves.easeOutCubic),
-              child: CustomDialog(
-                // our custom dialog
-                title: "",
-                content: "",
-                // "Here goes the content of dialog. Here goes the content of dialog. Here goes the content of dialog.",
-                backgroundImage:
-                'https://pauliseguros.com.br/dogs_paper/$index.jpg',
-                positiveBtnText: "Done",
-                negativeBtnText: "Cancel",
-                sameIndexSelected: index == lastIndexSelected,
-                positiveBtnPressed: positiveAction,
-                negativeBtnPressed: negativeAction,
-              ),
-            ),
-            isLoadingPositive
-                ? Center(
-              child: CircularProgressIndicator(
-                strokeWidth: 8.0,
-                backgroundColor: Colors.lightBlueAccent,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-              ),
-            )
+            Image.asset('assets/images/$index.jpg', fit: BoxFit.cover),
+            (index == _actualPaper)
+                ? Stack(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6.0, right: 6.0),
+                        child: Align(
+                          alignment: Alignment.topRight,
+                          child: Icon(
+                            Icons.star,
+                            color: Colors.yellowAccent,
+                            size: 31.0,
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 13.0, right: 13.0),
+                        child: Align(
+                          alignment: Alignment.topRight,
+                          child: Icon(
+                            Icons.star,
+                            color: Colors.lightBlue[50],
+                            size: 18.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
                 : Container(),
           ],
-        );
-      },
-      pageBuilder: (BuildContext context, Animation animation,
-          Animation secondaryAnimation) {
-        return null;
-      },
+        ),
+      ),
     );
-    Future.delayed(const Duration(seconds: 1), () {
-      lastIndexSelected = index;
-    });
   }
 
-  return GestureDetector(
-    onTap: showImage,
-    child: Card(
-      color: _appColor,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset('assets/images/$index.jpg', fit: BoxFit.cover),
-          (index == _actualPaper)
-              ? Stack(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 6.0, right: 6.0),
-                child: Align(
-                  alignment: Alignment.topRight,
-                  child: Icon(
-                    Icons.star,
-                    color: Colors.yellowAccent,
-                    size: 31.0,
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 13.0, right: 13.0),
-                child: Align(
-                  alignment: Alignment.topRight,
-                  child: Icon(
-                    Icons.star,
-                    color: Colors.lightBlue[50],
-                    size: 18.0,
-                  ),
-                ),
-              ),
-            ],
-          )
-              : Container(),
-        ],
-      ),
-    ),
-  );
-}
-
   negativeAction() {
-    Get.back();
+    Navigator.pop(context);
   }
 
   positiveAction() {
@@ -154,10 +143,13 @@ showImageCard(String index) {
 
   setPaper() async {
     await setWallpaper(widget.index);
-    Future.delayed(const Duration(seconds: 1), () {
-      exit(0);
+    closeApp();
+  }
+
+  closeApp() {
+    Future.delayed(const Duration(milliseconds: 1000), () {
+      SystemChannels.platform.invokeMethod('SystemNavigator.pop');
     });
-    Get.back();
   }
 
   setWallpaper(String indexPaper) async {
@@ -175,12 +167,8 @@ showImageCard(String index) {
     await storage.setPaper("dog", indexPaper);
   }
 
-
   Future<String> getActualPaper() async {
     _actualPaper = await storage.getPaper('dog');
     return _actualPaper;
   }
-
-
-
 }

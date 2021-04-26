@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../ad_state.dart';
+import 'circular_indicator.dart';
 
 class CustomDialog extends StatefulWidget {
   final String title,
@@ -40,6 +41,7 @@ class _CustomDialogState extends State<CustomDialog> {
   String _connectionStatus = 'Unknown';
   final Connectivity _connectivity = Connectivity();
   StreamSubscription<ConnectivityResult> _connectivitySubscription;
+  bool _buttonPressed = false;
 
   @override
   void dispose() {
@@ -123,61 +125,69 @@ class _CustomDialogState extends State<CustomDialog> {
       children: <Widget>[
         Container(
           // Bottom rectangular box
-          margin:
-              EdgeInsets.only(top: 30), // to push the box half way below circle
+          margin: EdgeInsets.only(
+              top: 10, bottom: 20), // to push the box half way below circle
           decoration: BoxDecoration(
             color: Colors.black54,
             borderRadius: BorderRadius.circular(12),
           ),
           padding: EdgeInsets.symmetric(
-              horizontal: 8, vertical: 40), // spacing inside the box
+              horizontal: 8, vertical: 34), // spacing inside the box
           child: Stack(
             children: [
-              !_imageLoadComplete && !widget.sameIndexSelected ?
-                Center(
-                  child: CircularProgressIndicator(
-                    backgroundColor: Colors.red,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
-                  ),
-                ) : Container(),
+              !_imageLoadComplete && !widget.sameIndexSelected
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        backgroundColor: Colors.red,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                      ),
+                    )
+                  : Container(),
               Container(
                 width: double.infinity,
                 height: double.infinity,
-                child: (_connectionStatus == 'ConnectivityResult.none') ?
-                Text("Internet fora do ar...") : Image.network(
-                  widget.backgroundImage,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (BuildContext context, Widget child,
-                      ImageChunkEvent loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    if (loadingProgress.cumulativeBytesLoaded ==
-                        loadingProgress.expectedTotalBytes) {
-                      Future.delayed(const Duration(milliseconds: 500), () {
-                        setState(() {
-                          _imageLoadComplete = true;
-                        });
-                      });
-                    }
-                    return Stack(
-                      children: [
-                        Container(
-                            width: double.infinity,
-                            height: double.infinity,
-                            color: Colors.white24,
-                            child: Container()),
-                        !widget.sameIndexSelected ?
-                        Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded /
-                                    loadingProgress.expectedTotalBytes
-                                : null,
-                          ),
-                        ) : Container(),
-                      ],
-                    );
-                  },
-                ),
+                child: (_connectionStatus == 'ConnectivityResult.none')
+                    ? Text("Internet fora do ar...")
+                    : Image.network(
+                        widget.backgroundImage,
+                        fit: BoxFit.cover,
+                        loadingBuilder: (BuildContext context, Widget child,
+                            ImageChunkEvent loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          if (loadingProgress.cumulativeBytesLoaded ==
+                              loadingProgress.expectedTotalBytes) {
+                            Future.delayed(const Duration(milliseconds: 500),
+                                () {
+                              setState(() {
+                                _imageLoadComplete = true;
+                              });
+                            });
+                          }
+                          return Stack(
+                            children: [
+                              Container(
+                                  width: double.infinity,
+                                  height: double.infinity,
+                                  color: Colors.white24,
+                                  child: Container()),
+                              !widget.sameIndexSelected
+                                  ? Center(
+                                      child: CircularProgressIndicator(
+                                        value: loadingProgress
+                                                    .expectedTotalBytes !=
+                                                null
+                                            ? loadingProgress
+                                                    .cumulativeBytesLoaded /
+                                                loadingProgress
+                                                    .expectedTotalBytes
+                                            : null,
+                                      ),
+                                    )
+                                  : Container(),
+                            ],
+                          );
+                        },
+                      ),
               ),
               Container(
                 child: Column(
@@ -199,7 +209,9 @@ class _CustomDialogState extends State<CustomDialog> {
                     SizedBox(
                       height: 26,
                     ),
-                    _imageLoadComplete || widget.sameIndexSelected ? _listButtons() : Container(),
+                    _imageLoadComplete || widget.sameIndexSelected
+                        ? _listButtons()
+                        : Container(),
                   ],
                 ),
               ),
@@ -209,7 +221,7 @@ class _CustomDialogState extends State<CustomDialog> {
         Opacity(
           opacity: 0.7,
           child: Container(
-            margin: EdgeInsets.only(top: 110),
+            margin: EdgeInsets.only(top: 80),
             child: _imageLoadComplete || widget.sameIndexSelected
                 ? Column(
                     children: [
@@ -277,17 +289,29 @@ class _CustomDialogState extends State<CustomDialog> {
           padding: const EdgeInsets.all(14.0),
           child: Align(
             alignment: Alignment.topRight,
-            child: ElevatedButton(
-              style: negativeButtonStyle,
-              child: Icon(
-                Icons.close,
-                color: Colors.white,
-                size: 36.0,
-              ),
-              onPressed: widget.negativeBtnPressed,
-            ),
+            child: !_buttonPressed
+                ? ElevatedButton(
+                    style: negativeButtonStyle,
+                    child: Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 36.0,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _buttonPressed = true;
+                      });
+                      widget.negativeBtnPressed();
+                    },
+                  )
+                : Container(),
           ),
         ),
+        _buttonPressed
+            ? Padding(
+                padding: const EdgeInsets.only(bottom: 20.0),
+                child: CircularIndicator())
+            : Container(),
       ],
     );
   }
@@ -297,16 +321,23 @@ class _CustomDialogState extends State<CustomDialog> {
       buttonMinWidth: 200,
       alignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        ElevatedButton(
-          autofocus: true,
-          style: positiveButtonStyle,
-          child: Icon(
-            Icons.check,
-            color: Colors.white,
-            size: 56.0,
-          ),
-          onPressed: widget.positiveBtnPressed,
-        ),
+        !_buttonPressed
+            ? ElevatedButton(
+                autofocus: true,
+                style: positiveButtonStyle,
+                child: Icon(
+                  Icons.check,
+                  color: Colors.white,
+                  size: 56.0,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _buttonPressed = true;
+                  });
+                  widget.positiveBtnPressed();
+                },
+              )
+            : Container(),
       ],
     );
   }

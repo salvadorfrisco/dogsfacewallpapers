@@ -5,6 +5,9 @@
     <application
         android:label="Dogs Face Wallpaper"
         android:icon="@mipmap/launcher_icon">
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-5668668662931095~8796421417"/>
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
@@ -39,8 +42,5 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        <meta-data
-            android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-5668668662931095~8796421417"/>
     </application>
 </manifest>

@@ -1,22 +1,20 @@
-import 'dart:io';
-import 'dart:typed_data';
 import 'package:dogs_wallpaper/ad_state.dart';
 import 'package:dogs_wallpaper/ui/grid_images.dart';
-import 'package:dogs_wallpaper/widgets/custom_dialog.dart';
 import 'package:dogs_wallpaper/widgets/show_banner.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
-import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
-import '../services/storage_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:wallpaper_manager/wallpaper_manager.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
 
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  BannerAd banner;
 
   final Color _appColor = Colors.black87
   ;
@@ -35,8 +33,12 @@ class HomePage extends StatelessWidget {
       children: [
         Expanded(child: _selectModel()),
         Container(
-            height: 50,
-            child: ShowBanner(),
+          height: banner == null ? 1 : 60,
+          child: banner == null
+              ? SizedBox(
+            height: 1,
+          )
+              : ShowBanner(),
           )
       ],
     );
@@ -63,6 +65,22 @@ class HomePage extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final adState = Provider.of<AdState>(context);
+    adState.initialization.then((status) {
+      setState(() {
+        banner = BannerAd(
+          adUnitId: adState.bannerAdUnitId,
+          size: AdSize.banner,
+          request: AdRequest(),
+          listener: adState.adListener,
+        )..load();
+      });
+    });
   }
 }
 

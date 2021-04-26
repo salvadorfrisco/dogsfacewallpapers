@@ -2,7 +2,6 @@ import 'package:dogs_wallpaper/ad_state.dart';
 import 'package:dogs_wallpaper/ui/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:provider/provider.dart';
 
@@ -27,7 +26,7 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitDown,
     ]);
 
-    return GetMaterialApp(
+    return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: HomePage()
     );
